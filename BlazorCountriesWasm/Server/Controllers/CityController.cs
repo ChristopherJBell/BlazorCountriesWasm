@@ -69,7 +69,7 @@ namespace BlazorCountriesWasm.Server.Controllers
         [HttpGet]
         [Route("{CityId}")]
         //Or you can combine the two lines as: [HttpGet("{CityId}")]
-        public async Task<ActionResult<City>> GetSingleCity(int CityId)
+        public async Task<ActionResult<City>> GetCityById(int CityId)
         {
             var city = cities.FirstOrDefault(c => c.CityId == CityId);
             if (city == null)

@@ -1,0 +1,34 @@
+﻿@page "/countrylist"
+
+@inject ICountryService CountryService;
+
+<PageTitle>Countries List</PageTitle>
+
+<h3>Countries List</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Country ID</th>
+            <th>Country Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var country in CountryService.Countries)
+        {
+            <tr>
+                <td>@country.CountryId</td>
+                <td>@country.CountryName</td>
+            </tr>
+        }
+
+    </tbody>
+</table>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await CountryService.GetCountries();
+    }
+
+}
