@@ -365,3 +365,7 @@ FodyWeavers.xsd
 #CJB
 Client/wwwroot/appsettings.json
 Client/wwwroot/appsettings.Development.json
+wwwroot/appsettings.json
+wwwroot/appsettings.Development.json
+appsettings.json
+appsettings.Development.json
