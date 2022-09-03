@@ -1,5 +1,6 @@
 global using BlazorCountriesWasm.Shared;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.Extensions.Configuration;
 
 
 var builder = WebApplication.CreateBuilder(args);

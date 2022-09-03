@@ -24,8 +24,6 @@
 @code {
     public List<Country>? countries;
 
-    public string SyncfusionKey = string.Empty;
-
     protected override async Task OnInitializedAsync()
     {
         await CountryService.GetCountries();

@@ -4,7 +4,7 @@ namespace BlazorCountriesWasm.Client.Services.CountryService
 {
     public class CountryService : ICountryService
     {
-        private readonly HttpClient _http;
+        private readonly HttpClient _http;        
         public CountryService(HttpClient http)
         {
             _http = http;
@@ -17,7 +17,7 @@ namespace BlazorCountriesWasm.Client.Services.CountryService
         {
             var result = await _http.GetFromJsonAsync<List<Country>>("api/country");
             if (result != null)
-                Countries = result;
+                Countries = result;               
         }
         public Task<Country> GetCountryById(int id)
         {
