@@ -4,6 +4,7 @@ using BlazorCountriesWasm.Client;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Syncfusion.Blazor;
+using Syncfusion.Blazor.Popups;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -13,6 +14,7 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 builder.Services.AddScoped<ICountryService, CountryService>();
 
 builder.Services.AddSyncfusionBlazor();
+builder.Services.AddScoped<SfDialogService>();
 
 var SyncfusionLicenceKey = builder.Configuration["SyncfusionLicenceKey"];
 Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(SyncfusionLicenceKey);

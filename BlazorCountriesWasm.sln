@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32804.467
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorCountriesWasm.Server", "BlazorCountriesWasm\Server\BlazorCountriesWasm.Server.csproj", "{3127D93C-213B-4066-BD31-7CE0F6423F1E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorCountriesWasm.Server", "BlazorCountriesWasm\Server\BlazorCountriesWasm.Server.csproj", "{3127D93C-213B-4066-BD31-7CE0F6423F1E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorCountriesWasm.Client", "BlazorCountriesWasm\Client\BlazorCountriesWasm.Client.csproj", "{CC67BB28-EA85-486A-B887-550AAF423F9D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorCountriesWasm.Client", "BlazorCountriesWasm\Client\BlazorCountriesWasm.Client.csproj", "{CC67BB28-EA85-486A-B887-550AAF423F9D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorCountriesWasm.Shared", "BlazorCountriesWasm\Shared\BlazorCountriesWasm.Shared.csproj", "{0ACCEB02-9E60-42A9-B3D9-925AE4C13D92}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorCountriesWasm.Shared", "BlazorCountriesWasm\Shared\BlazorCountriesWasm.Shared.csproj", "{0ACCEB02-9E60-42A9-B3D9-925AE4C13D92}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
