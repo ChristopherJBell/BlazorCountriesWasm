@@ -14,7 +14,7 @@ namespace BlazorCountriesWasm.Client.Services.CountryService
 
         public HttpClient? Http { get; }        //? here gets rid of green squiggly on "Public CountryService(HttpClient http)"
 
-        public async Task CountryDelete(int? Countryid)
+        public async Task CountryDelete(int Countryid)
         {
             var result = await _http.DeleteAsync($"api/country/{Countryid}");
         }
@@ -35,6 +35,7 @@ namespace BlazorCountriesWasm.Client.Services.CountryService
             if (result != null)
                 Countries = result;
         }
+
         public async Task<Country> GetCountryById(int id)
         {
             var result = await _http.GetFromJsonAsync<Country>($"api/country/{id}");
@@ -42,6 +43,5 @@ namespace BlazorCountriesWasm.Client.Services.CountryService
                 return result;
             throw new Exception("Country not found!");
         }
-
     }
 }

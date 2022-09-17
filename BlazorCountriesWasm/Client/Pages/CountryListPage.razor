@@ -40,8 +40,7 @@
         Toolbaritems.Add(new ItemModel() { Text = "Edit", TooltipText = "Edit selected country", PrefixIcon = "e-edit" });
         Toolbaritems.Add(new ItemModel() { Text = "Delete", TooltipText = "Delete selected country", PrefixIcon = "e-delete" });
 
-        await GetCountriesForGrid();
-
+        await RefreshCountriesGrid();
     }
 
     public async Task ToolbarClickHandler(Syncfusion.Blazor.Navigations.ClickEventArgs args)
@@ -52,19 +51,21 @@
             CountryID = 0;
             NavigationManager.NavigateTo($"/countriesaddedit/{CountryID}");
         }
+
         if (args.Item.Text == "Edit")
         {
-            if (CountryID > 0)
+            //Check that the user has selected a row
+            if (CountryID == 0)
             {
-                NavigationManager.NavigateTo($"/countriesaddedit/{CountryID}");
+                await DialogService.AlertAsync("Please select a country.", "No Country Selected");
             }
             else
             {
-                // Warn user that no record has been selected
-                await DialogService.AlertAsync("Please select a country.", "No Country Selected");
+                NavigationManager.NavigateTo($"/countriesaddedit/{CountryID}");
+                CountryID = 0;
             }
-
         }
+
         if (args.Item.Text == "Delete")
         {
             //Check that the user has selected a row
@@ -75,12 +76,13 @@
             else
             {
                 //code for deleting
-                bool isConfirm = await DialogService.ConfirmAsync($"Are you sure you want to delete {CountryName}?", "Delete Country");
+                string dialogMessage = $"Are you sure you want to delete {CountryName}?";
+                bool isConfirm = await DialogService.ConfirmAsync(dialogMessage, "Delete Country");
                 if (isConfirm)
                 {
                     await CountryService.CountryDelete(CountryID);
-
-                    await GetCountriesForGrid();
+                    await RefreshCountriesGrid();
+                    CountryID = 0;
                 }
             }
         }
@@ -93,7 +95,7 @@
         CountryName = args.Data.CountryName;
     }
 
-    public async Task GetCountriesForGrid()
+    public async Task RefreshCountriesGrid()
     {
         await CountryService.GetCountries();
         countries = new();
