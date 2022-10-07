@@ -2,6 +2,9 @@
 @inject ICountryService CountryService;
 @inject NavigationManager NavigationManager
 
+@using Syncfusion.Blazor.Popups
+@inject SfDialogService DialogService
+
 <PageTitle>@pagetitle</PageTitle>
 
 <h1>@pagetitle</h1>
@@ -55,13 +58,29 @@
     {
         if (CountryId == 0)
         {
-            await CountryService.CountryInsert(country);
-            NavigationManager.NavigateTo("/countrylist");
+            //Check for duplicates
+            if (await CountryService.CountCountriesByName(country.CountryName) == 0)
+            {
+                await CountryService.CountryInsert(country);
+                NavigationManager.NavigateTo("/countrylist");
+            }
+            else
+            {
+                await DialogService.AlertAsync("Sorry, you can't add this country again, it already exists", "Country Already Exists");
+            }
         }
         else
         {
-            await CountryService.CountryUpdate(CountryId, country);
-            NavigationManager.NavigateTo("/countrylist");
+            //Check for duplicates
+            if (await CountryService.CountCountriesByNameAndId(country.CountryName, country.CountryId) == 0)
+            {
+                await CountryService.CountryUpdate(CountryId, country);
+                NavigationManager.NavigateTo("/countrylist");
+            }
+            else
+            {
+                await DialogService.AlertAsync("Sorry, you can't add this country again, it already exists", "Country Already Exists");
+            }
         }
     }
 

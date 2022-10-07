@@ -21,7 +21,7 @@ namespace BlazorCountriesWasm.Client.Services.CountryService
 
         public async Task CountryInsert(Country country)
         {
-            var result = await _http.PostAsJsonAsync("api/country", country); ;
+            var result = await _http.PostAsJsonAsync("api/country/", country); ;
         }
 
         public async Task CountryUpdate(int Countryid, Country country)
@@ -31,9 +31,8 @@ namespace BlazorCountriesWasm.Client.Services.CountryService
 
         public async Task GetCountries()
         {
-            var result = await _http.GetFromJsonAsync<List<Country>>("api/country");
-            if (result != null)
-                Countries = result;
+            var result = await _http.GetFromJsonAsync<List<Country>>("api/country/");
+            Countries = result;
         }
 
         public async Task<Country> GetCountryById(int id)
@@ -43,5 +42,17 @@ namespace BlazorCountriesWasm.Client.Services.CountryService
                 return result;
             throw new Exception("Country not found!");
         }
+
+        public async Task<int> CountCountriesByName(string countryName)
+        {
+            var result = await _http.GetFromJsonAsync<int>($"api/countryname/{countryName}");
+            return result;
+        }
+
+        public async Task<int> CountCountriesByNameAndId(string countryName, int id)
+        {
+            var result = await _http.GetFromJsonAsync<int>($"api/countryname/{countryName}/{id}");
+            return result;
+        }
+
     }
-}

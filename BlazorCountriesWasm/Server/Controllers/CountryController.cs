@@ -5,7 +5,7 @@ using System.Data.SQLite;
 
 namespace BlazorCountriesWasm.Server.Controllers
 {
-    [Route("api/[controller]")]
+    //[Route("api/[controller]")]
     [ApiController]
     public class CountryController : ControllerBase
     {
@@ -17,10 +17,11 @@ namespace BlazorCountriesWasm.Server.Controllers
 
         public string connectionId = "Default";
         public string sqlCommand = "";
-        IEnumerable<Country> countries;
+        IEnumerable<Country> countries;        
 
 
         [HttpGet]
+        [Route("api/country/")]
         public async Task<ActionResult<List<Country>>> GetCountries()
         {
             sqlCommand = "Select * From Countries";
@@ -30,12 +31,10 @@ namespace BlazorCountriesWasm.Server.Controllers
                 countries = await conn.QueryAsync<Country>(sqlCommand);
             }
             return Ok(countries);
-
         }
 
-        [HttpGet("{CountryId}")]
-        //[Route("{CountryId}")]
-        //Or you can combine the two lines as: [HttpGet("{CountryId}")]
+        [HttpGet]
+        [Route("api/country/{CountryId}")]        
         public async Task<ActionResult<Country>> GetCountryById(int CountryId)
         {
             var parameters = new DynamicParameters();
@@ -51,7 +50,44 @@ namespace BlazorCountriesWasm.Server.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("api/countryname/{CountryName}")]
+        public async Task<ActionResult> CountCountriesByName(string CountryName)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@CountryName", CountryName, DbType.String);
+
+            sqlCommand = $"Select Count(*) From Countries " +
+                "Where Upper(CountryName) =  Upper(@CountryName)";
+
+            using IDbConnection conn = new SQLiteConnection(_config.GetConnectionString(connectionId));
+            {
+                int duplicates = await conn.QueryFirstAsync<int>(sqlCommand, parameters);
+                return Ok(duplicates);
+            }
+        }
+
+        [HttpGet]
+        [Route("api/countryname/{CountryName}/{CountryId}")]
+        public async Task<ActionResult> CountCountriesByNameAndId(string CountryName, int CountryId)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@CountryName", CountryName, DbType.String);
+            parameters.Add("@CountryId", CountryId, DbType.Int32);
+
+            sqlCommand = $"Select Count(*) From Countries " +
+                "Where Upper(CountryName) =  Upper(@CountryName) " +
+                "And CountryId <> @CountryId";
+
+            using IDbConnection conn = new SQLiteConnection(_config.GetConnectionString(connectionId));
+            {
+                int duplicates = await conn.QueryFirstAsync<int>(sqlCommand, parameters);
+                return Ok(duplicates);
+            }
+        }
+
         [HttpPost]
+        [Route("api/country/")]
         public async Task<ActionResult<List<Country>>> CountryInsert(Country country)
         {
             var parameters = new DynamicParameters();
@@ -65,7 +101,8 @@ namespace BlazorCountriesWasm.Server.Controllers
             return Ok();
         }
 
-        [HttpPut("{CountryId}")]
+        [HttpPut]
+        [Route("api/country/{countryId}")]
         public async Task<ActionResult<List<Country>>> CountryUpdate(Country country)
         {
             var parameters = new DynamicParameters();
@@ -83,7 +120,8 @@ namespace BlazorCountriesWasm.Server.Controllers
             return Ok();
         }
 
-        [HttpDelete("{CountryId}")]
+        [HttpDelete]
+        [Route("api/country/{CountryId}")]
         public async Task<ActionResult> CountryDelete(int CountryId)
         {
             var parameters = new DynamicParameters();
