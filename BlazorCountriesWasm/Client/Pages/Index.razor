@@ -1,31 +1,62 @@
 ﻿@page "/"
+@inject ICountryService CountryService;
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Countries & Cities List</PageTitle>
 
-<h1>Hello, world!</h1>
+<h3>Countries and Cities</h3>
+<div class="DropDownWrapper">
+    <SfDropDownList TItem="Country"
+                    TValue="string"
+                    DataSource="@countries"
+                    Placeholder="Select a country"
+                    PopupHeight="200px"
+                    PopupWidth="250px">
+        <DropDownListFieldSettings Text="CountryName" Value="CountryId"></DropDownListFieldSettings>
+    </SfDropDownList>
+</div>
 
-Welcome to your new app.
+<div>
+        <SfGrid ID="CityGrid"
+                DataSource="@cities"
+                AllowSorting="true"
+                AllowResizing="true"
+                Height="200">
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+            <GridColumns>
+                <GridColumn Field="@nameof(City.CityName)"
+                            HeaderText="City Name"
+                            TextAlign="@TextAlign.Left"
+                            Width="50">
+                </GridColumn>
+                <GridColumn Field="@nameof(City.CityPopulation)"
+                            HeaderText="Population"
+                            Format="n"
+                            TextAlign="@TextAlign.Right"
+                            Width="50">
+                </GridColumn>
+            </GridColumns>
+        </SfGrid>
+</div>
 
-@using Syncfusion.Blazor.Popups
-@using Syncfusion.Blazor.Buttons
-@*@inject SfDialogService DialogService
-*@
-    @*<div>
-        <SfButton @onclick="@ConfirmBtn">Confirm</SfButton>
-    </div>*@
-    @*<div class="status" style ="padding-top:10px">
-    @DialogStatus
-</div>*@
+<style>
+    .DropDownWrapper {
+        width: 250px;
+    }
+ </style>
 
 @code {
-    //private string DialogStatus { get; set; } = string.Empty;
+    List<Country>? countries;
+    List<Country>? countriesUnordered;
+    List<City>? cities;
 
-    //private async Task ConfirmBtn()
-    //{
-    //    bool isConfirm = await DialogService.ConfirmAsync("Are you sure you want to permanently delete these items?", "Delete Multiple Items");
-    //    string confirmMessage = isConfirm ? "confirmed" : "canceled";
-    //    this.DialogStatus = $"The user {confirmMessage} the dialog box."; 
-    //}
+    protected override async Task OnInitializedAsync()
+    {
+        //Populate the list of countries objects from the Countries table.
+        await CountryService.GetCountries();
+        countriesUnordered = new();
+        foreach (var country in CountryService.Countries)
+            countriesUnordered.Add(country);
+
+        countries = countriesUnordered.OrderBy(c => c.CountryName).ToList();
+    }
 }
