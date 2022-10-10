@@ -1,4 +1,5 @@
 global using BlazorCountriesWasm.Client.Services.CountryService;
+global using BlazorCountriesWasm.Client.Services.CityService;
 global using BlazorCountriesWasm.Shared;
 using BlazorCountriesWasm.Client;
 using Microsoft.AspNetCore.Components.Web;
@@ -12,6 +13,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.AddScoped<ICountryService, CountryService>();
+builder.Services.AddScoped<ICityService, CityService>();
 
 builder.Services.AddSyncfusionBlazor();
 builder.Services.AddScoped<SfDialogService>();

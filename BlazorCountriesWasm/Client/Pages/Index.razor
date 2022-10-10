@@ -1,5 +1,6 @@
 ﻿@page "/"
 @inject ICountryService CountryService;
+@inject ICityService CityService;
 
 <PageTitle>Countries & Cities List</PageTitle>
 
@@ -12,6 +13,7 @@
                     PopupHeight="200px"
                     PopupWidth="250px">
         <DropDownListFieldSettings Text="CountryName" Value="CountryId"></DropDownListFieldSettings>
+        <DropDownListEvents TItem="Country" TValue="string" ValueChange="OnChange"></DropDownListEvents>
     </SfDropDownList>
 </div>
 
@@ -48,6 +50,10 @@
     List<Country>? countries;
     List<Country>? countriesUnordered;
     List<City>? cities;
+    List<City>? citiesUnordered;
+
+    [Parameter]
+    public int SelectedCountryId { get; set; } = 0;
 
     protected override async Task OnInitializedAsync()
     {
@@ -58,5 +64,19 @@
             countriesUnordered.Add(country);
 
         countries = countriesUnordered.OrderBy(c => c.CountryName).ToList();
+
     }
+
+    public async Task OnChange(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, Country> args)
+    {
+        // Populate list of cities for the selected country
+        SelectedCountryId = args.ItemData.CountryId;
+        citiesUnordered = new();
+        await CityService.GetCitiesByCountryId(SelectedCountryId);  
+        foreach (var city in CityService.Cities)
+            citiesUnordered.Add(city);
+
+        cities = citiesUnordered.OrderBy(c => c.CityName).ToList();
+    }
+
 }
