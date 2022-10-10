@@ -1,85 +1,160 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Dapper;
 using Microsoft.AspNetCore.Mvc;
+using System.Data;
+using System.Data.SQLite;
+using System.Threading.Tasks;
 
 namespace BlazorCountriesWasm.Server.Controllers
 {
-    [Route("api/[controller]")]
+    //[Route("api/[controller]")]
     [ApiController]
     public class CityController : ControllerBase
     {
-        public static List<City> cities = new List<City>
+        private readonly IConfiguration _config;
+        public CityController(IConfiguration config)
         {
-            new City
-            {
-                CityId = 1,
-                CityName = "London",
-                CityPopulation = 9000000,
-                CountryId = 1
-            },
-            new City
-            {
-                CityId = 2,
-                CityName = "Birmingham",
-                CityPopulation = 1500000,
-                CountryId = 1
-            },
-            new City
-            {
-                CityId = 3,
-                CityName = "Oxford",
-                CityPopulation = 250000,
-                CountryId = 1
-            },
-            new City
-            {
-                CityId = 4,
-                CityName = "Cambridge",
-                CityPopulation = 200000,
-                CountryId = 1
-            },
-            new City
-            {
-                CityId = 5,
-                CityName = "Paris",
-                CityPopulation = 7500000,
-                CountryId = 2
-            },
-            new City
-            {
-                CityId = 6,
-                CityName = "Toulouse",
-                CityPopulation = 200000,
-                CountryId = 2
-            },
-            new City
-            {
-                CityId = 7,
-                CityName = "Grenoble",
-                CityPopulation = 200000,
-                CountryId = 2
-            }
-        };
+            _config = config;
+        }
+
+        public string connectionId = "Default";
+        public string sqlCommand = "";
+        IEnumerable<City>? cities;
+
+
 
         [HttpGet]
+        [Route("api/city/")]
         public async Task<ActionResult<List<City>>> GetCities()
         {
+            sqlCommand = "Select * From Cities";
+
+            using IDbConnection conn = new SQLiteConnection(_config.GetConnectionString(connectionId));
+            {
+                cities = await conn.QueryAsync<City>(sqlCommand);
+            }
             return Ok(cities);
         }
 
         [HttpGet]
-        [Route("{CityId}")]
-        //Or you can combine the two lines as: [HttpGet("{CityId}")]
+        [Route("api/city/{CityId}")]
         public async Task<ActionResult<City>> GetCityById(int CityId)
         {
-            var city = cities.FirstOrDefault(c => c.CityId == CityId);
-            if (city == null)
+            var parameters = new DynamicParameters();
+            parameters.Add("@CityId", CityId, DbType.Int32);
+
+            sqlCommand = $"Select * From Cities " +
+                "Where CityId =  @CityId";
+
+            using IDbConnection conn = new SQLiteConnection(_config.GetConnectionString(connectionId));
             {
-                return NotFound("Sorry, no city found.");
-            }
-            else
-            {
+                var city = await conn.QueryFirstAsync<City>(sqlCommand, parameters);
                 return Ok(city);
             }
+        }
+
+        [HttpGet]
+        [Route("api/citiesbycountryid/{CountryId}")]
+        public async Task<ActionResult<City>> GetCitiesByCountryId(int CountryId)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@CountryId", CountryId, DbType.Int32);
+
+            sqlCommand = $"Select * From Cities " +
+                "Where CountryId =  @CountryId";
+
+            using IDbConnection conn = new SQLiteConnection(_config.GetConnectionString(connectionId));
+            {
+                cities = await conn.QueryAsync<City>(sqlCommand, parameters);
+            }
+            return Ok(cities);
+        }
+
+
+        [HttpGet]
+        [Route("api/cityname/{CityName}")]
+        public async Task<ActionResult> CountCitiesByName(string CityName)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@CityName", CityName, DbType.String);
+
+            sqlCommand = $"Select Count(*) From Cities " +
+                "Where Upper(CityName) =  Upper(@CityName)";
+
+            using IDbConnection conn = new SQLiteConnection(_config.GetConnectionString(connectionId));
+            {
+                int duplicates = await conn.QueryFirstAsync<int>(sqlCommand, parameters);
+                return Ok(duplicates);
+            }
+        }
+
+        [HttpGet]
+        [Route("api/cityname/{CityName}/{CityId}")]
+        public async Task<ActionResult> CountCitiesByNameAndId(string CityName, int CityId)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@CityName", CityName, DbType.String);
+            parameters.Add("@CityId", CityId, DbType.Int32);
+
+            sqlCommand = $"Select Count(*) From Cities " +
+                "Where Upper(CityName) =  Upper(@CityName) " +
+                "And CityId <> @CityId";
+
+            using IDbConnection conn = new SQLiteConnection(_config.GetConnectionString(connectionId));
+            {
+                int duplicates = await conn.QueryFirstAsync<int>(sqlCommand, parameters);
+                return Ok(duplicates);
+            }
+        }
+
+        [HttpPost]
+        [Route("api/city/")]
+        public async Task<ActionResult<List<City>>> CityInsert(City city)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("CityName", city.CityName, DbType.String);
+
+            sqlCommand = "Insert into Cities (CityName) values(@CityName)";
+            using IDbConnection conn = new SQLiteConnection(_config.GetConnectionString(connectionId));
+            {
+                await conn.ExecuteAsync(sqlCommand, parameters);
+            }
+            return Ok();
+        }
+
+        [HttpPut]
+        [Route("api/city/{cityId}")]
+        public async Task<ActionResult<List<City>>> CityUpdate(City city)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("CityId", city.CityId, DbType.Int32);
+            parameters.Add("CityName", city.CityName, DbType.String);
+
+            sqlCommand =
+                "Update Cities " +
+                "set CityName = @CityName " +
+                "Where CityId = @CityId";
+            using IDbConnection conn = new SQLiteConnection(_config.GetConnectionString(connectionId));
+            {
+                await conn.ExecuteAsync(sqlCommand, parameters);
+            }
+            return Ok();
+        }
+
+        [HttpDelete]
+        [Route("api/city/{CityId}")]
+        public async Task<ActionResult> CityDelete(int CityId)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("CityId", CityId, DbType.Int32);
+
+            sqlCommand =
+                "Delete From Cities " +
+                "Where CityId = @CityId";
+            using IDbConnection conn = new SQLiteConnection(_config.GetConnectionString(connectionId));
+            {
+                await conn.ExecuteAsync(sqlCommand, parameters);
+            }
+            return Ok();
         }
     }
 }
