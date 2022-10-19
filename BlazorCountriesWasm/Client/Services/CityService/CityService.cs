@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using System.Runtime.InteropServices;
 
 namespace BlazorCountriesWasm.Client.Services.CityService
 {
@@ -49,15 +50,15 @@ namespace BlazorCountriesWasm.Client.Services.CityService
             throw new Exception("City not found!");
         }
 
-        public async Task<int> CountCitiesByName(string cityName)
+        public async Task<int> CountCitiesForInsert(int CountryId, string cityName)
         {
-            var result = await _http.GetFromJsonAsync<int>($"api/cityname/{cityName}");
+            var result = await _http.GetFromJsonAsync<int>($"api/city/{CountryId}/{cityName}");
             return result;
         }
 
-        public async Task<int> CountCitiesByNameAndId(string cityName, int id)
+        public async Task<int> CountCitiesForEdit(int CountryId, string cityName, int CityId)
         {
-            var result = await _http.GetFromJsonAsync<int>($"api/cityname/{cityName}/{id}");
+            var result = await _http.GetFromJsonAsync<int>($"api/city/{CountryId}/{cityName}/{CityId}");
             return result;
         }
 

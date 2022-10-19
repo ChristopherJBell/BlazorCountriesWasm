@@ -71,37 +71,41 @@ namespace BlazorCountriesWasm.Server.Controllers
 
 
         [HttpGet]
-        [Route("api/cityname/{CityName}")]
-        public async Task<ActionResult> CountCitiesByName(string CityName)
+        [Route("api/city/{CountryId}/{CityName}")]
+        public async Task<ActionResult> CountCitiesForInsert(int CountryId, string CityName)
         {
             var parameters = new DynamicParameters();
+            parameters.Add("@CountryId", CountryId, DbType.Int32);
             parameters.Add("@CityName", CityName, DbType.String);
 
             sqlCommand = $"Select Count(*) From Cities " +
-                "Where Upper(CityName) =  Upper(@CityName)";
+                "Where Upper(CityName) =  Upper(@CityName)" +
+                " and CountryId = @CountryId";
 
             using IDbConnection conn = new SQLiteConnection(_config.GetConnectionString(connectionId));
-            {
-                int duplicates = await conn.QueryFirstAsync<int>(sqlCommand, parameters);
+            {                
+                int duplicates = await conn.QuerySingleAsync<int>(sqlCommand, parameters);
                 return Ok(duplicates);
             }
         }
 
         [HttpGet]
-        [Route("api/cityname/{CityName}/{CityId}")]
-        public async Task<ActionResult> CountCitiesByNameAndId(string CityName, int CityId)
+        [Route("api/city/{CountryId}/{CityName}/{CityId}")]
+        public async Task<ActionResult> CountCitiesForEdit(int CountryId, string CityName, int CityId)
         {
             var parameters = new DynamicParameters();
+            parameters.Add("@CountryId", CountryId, DbType.Int32);
             parameters.Add("@CityName", CityName, DbType.String);
             parameters.Add("@CityId", CityId, DbType.Int32);
 
             sqlCommand = $"Select Count(*) From Cities " +
-                "Where Upper(CityName) =  Upper(@CityName) " +
-                "And CityId <> @CityId";
+                "Where Upper(CityName) =  Upper(@CityName)" +
+                " and CountryId = @CountryId" + 
+                " and CityId <> @CityId";
 
             using IDbConnection conn = new SQLiteConnection(_config.GetConnectionString(connectionId));
             {
-                int duplicates = await conn.QueryFirstAsync<int>(sqlCommand, parameters);
+                int duplicates = await conn.QuerySingleAsync<int>(sqlCommand, parameters);
                 return Ok(duplicates);
             }
         }
@@ -111,9 +115,13 @@ namespace BlazorCountriesWasm.Server.Controllers
         public async Task<ActionResult<List<City>>> CityInsert(City city)
         {
             var parameters = new DynamicParameters();
-            parameters.Add("CityName", city.CityName, DbType.String);
+            
+            parameters.Add("@CityName", city.CityName, DbType.String);
+            parameters.Add("@CityPopulation", city.CityPopulation, DbType.Int32);
+            parameters.Add("@CountryId", city.CountryId, DbType.Int32);
 
-            sqlCommand = "Insert into Cities (CityName) values(@CityName)";
+            sqlCommand = "Insert into Cities (CityName, CityPopulation, CountryId) " +
+                "values(@CityName, @CityPopulation, @CountryId)";
             using IDbConnection conn = new SQLiteConnection(_config.GetConnectionString(connectionId));
             {
                 await conn.ExecuteAsync(sqlCommand, parameters);
@@ -126,12 +134,16 @@ namespace BlazorCountriesWasm.Server.Controllers
         public async Task<ActionResult<List<City>>> CityUpdate(City city)
         {
             var parameters = new DynamicParameters();
-            parameters.Add("CityId", city.CityId, DbType.Int32);
-            parameters.Add("CityName", city.CityName, DbType.String);
+            parameters.Add("@CityId", city.CityId, DbType.Int32);
+            parameters.Add("@CityName", city.CityName, DbType.String);
+            parameters.Add("@CityPopulation", city.CityPopulation, DbType.Int32);
+            parameters.Add("@CountryId", city.CountryId, DbType.Int32);
 
             sqlCommand =
                 "Update Cities " +
-                "set CityName = @CityName " +
+                "set CityName = @CityName, " +
+                "CityPopulation = @CityPopulation, " +
+                "CountryId = @CountryId " +
                 "Where CityId = @CityId";
             using IDbConnection conn = new SQLiteConnection(_config.GetConnectionString(connectionId));
             {
@@ -145,7 +157,7 @@ namespace BlazorCountriesWasm.Server.Controllers
         public async Task<ActionResult> CityDelete(int CityId)
         {
             var parameters = new DynamicParameters();
-            parameters.Add("CityId", CityId, DbType.Int32);
+            parameters.Add("@CityId", CityId, DbType.Int32);
 
             sqlCommand =
                 "Delete From Cities " +

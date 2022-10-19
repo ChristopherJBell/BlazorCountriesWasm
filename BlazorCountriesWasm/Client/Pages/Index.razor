@@ -1,6 +1,8 @@
 ﻿@page "/"
 @inject ICountryService CountryService;
 @inject ICityService CityService;
+@inject SfDialogService DialogService;
+@using Syncfusion.Blazor.Popups;
 
 <PageTitle>Countries & Cities List</PageTitle>
 
@@ -17,34 +19,62 @@
     </SfDropDownList>
 </div>
 
-<div>
-        <SfGrid ID="CityGrid"
-                DataSource="@cities"
-                AllowSorting="true"
-                AllowResizing="true"
-                Height="200">
+<hr />
 
-            <GridColumns>
-                <GridColumn Field="@nameof(City.CityName)"
-                            HeaderText="City Name"
-                            TextAlign="@TextAlign.Left"
-                            Width="50">
-                </GridColumn>
-                <GridColumn Field="@nameof(City.CityPopulation)"
-                            HeaderText="Population"
-                            Format="n"
-                            TextAlign="@TextAlign.Right"
-                            Width="50">
-                </GridColumn>
-            </GridColumns>
-        </SfGrid>
+<div>
+    <SfGrid ID="CityGrid"
+            DataSource="@cities"
+            AllowSorting="true"
+            AllowResizing="true"
+            Height="200"
+            Toolbar="Toolbaritems">
+
+        <GridColumns>
+            <GridColumn Field="@nameof(City.CityName)"
+                        HeaderText="City Name"
+                        TextAlign="@TextAlign.Left"
+                        Width="50">
+            </GridColumn>
+            <GridColumn Field="@nameof(City.CityPopulation)"
+                        HeaderText="Population"
+                        Format="n"
+                        TextAlign="@TextAlign.Right"
+                        Width="50">
+            </GridColumn>
+        </GridColumns>
+        <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="City" RowSelected="RowSelectHandler"></GridEvents>
+    </SfGrid>
+</div>
+
+<div>
+    <SfDialog @ref="DialogCity" IsModal="true" Width="500px" ShowCloseIcon="true" Visible="false">        
+        <EditForm Model="@citiesAddEdit" OnValidSubmit="@CitiesSave">
+            <DataAnnotationsValidator />
+            <div>
+                <SfTextBox Enabled="true" Placeholder="City"
+                           FloatLabelType="@FloatLabelType.Always"
+                           @bind-Value="citiesAddEdit.CityName"></SfTextBox>
+                <ValidationMessage For="@(() => citiesAddEdit.CityName)" />
+                <SfNumericTextBox Enabled="true" Placeholder="Population" Width="50"
+                                  FloatLabelType="@FloatLabelType.Always"
+                                  @bind-Value="citiesAddEdit.CityPopulation"></SfNumericTextBox>
+                <ValidationMessage For="@(() => citiesAddEdit.CityPopulation)" />
+            </div>
+            <br /><br />
+            <div class="e-footer-content">
+                <div class="button-container">
+                    <button type="submit" class="e-btn e-normal e-primary">Save</button>
+                </div>
+            </div>
+        </EditForm>
+    </SfDialog>
 </div>
 
 <style>
     .DropDownWrapper {
         width: 250px;
     }
- </style>
+</style>
 
 @code {
     List<Country>? countries;
@@ -52,11 +82,26 @@
     List<City>? cities;
     List<City>? citiesUnordered;
 
+    private List<ItemModel> Toolbaritems = new List<ItemModel>();
+
+    SfDialog? DialogCity;
+    City citiesAddEdit = new City();
+
+    private int CityId = 0;
+    private string CityName = string.Empty;
+    private int CityPopulation = 0;
+
+
     [Parameter]
     public int SelectedCountryId { get; set; } = 0;
 
     protected override async Task OnInitializedAsync()
     {
+        //Add options for the custom toolbar
+        Toolbaritems.Add(new ItemModel() { Text = "Add", TooltipText = "Add a new country", PrefixIcon = "e-add" });
+        Toolbaritems.Add(new ItemModel() { Text = "Edit", TooltipText = "Edit selected country", PrefixIcon = "e-edit" });
+        Toolbaritems.Add(new ItemModel() { Text = "Delete", TooltipText = "Delete selected country", PrefixIcon = "e-delete" });
+
         //Populate the list of countries objects from the Countries table.
         await CountryService.GetCountries();
         countriesUnordered = new();
@@ -64,19 +109,137 @@
             countriesUnordered.Add(country);
 
         countries = countriesUnordered.OrderBy(c => c.CountryName).ToList();
-
     }
 
     public async Task OnChange(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, Country> args)
     {
         // Populate list of cities for the selected country
         SelectedCountryId = args.ItemData.CountryId;
+        await RefreshCitiesGrid();
+    }
+
+    public async Task ToolbarClickHandler(Syncfusion.Blazor.Navigations.ClickEventArgs args)
+    {
+        //Check that a Country has been selected
+        if (SelectedCountryId == 0)
+        {
+            await DialogService.AlertAsync("Please select a country.", "No Country Selected");
+            return;
+        }       
+
+        if (args.Item.Text == "Add")
+        {
+            //Code for adding goes here
+            citiesAddEdit = new();
+            await DialogCity.ShowAsync(false);            
+        }
+
+        if (args.Item.Text == "Edit")
+        {
+            //Code for editing
+            //Check that a City has been selected            
+            if (CityId == 0)
+            {
+                await DialogService.AlertAsync("Please select a city.", "No City Selected");
+                return;
+            }
+            citiesAddEdit = new();
+            citiesAddEdit.CityId = CityId;
+            citiesAddEdit.CityName = CityName;
+            citiesAddEdit.CityPopulation = CityPopulation;
+            citiesAddEdit.CountryId = SelectedCountryId;
+            await DialogCity.ShowAsync(false);
+        }
+
+        if (args.Item.Text == "Delete")
+        {
+            //code for deleting
+            //Check a City has been selected
+            if (CityId == 0)
+            {
+                await DialogService.AlertAsync("Please select a city.", "No City Selected");
+                return;
+            }
+            else
+            {
+                //code for deleting
+                //Check that user really wants to delete the selected city
+                string dialogMessage = $"Are you sure you want to delete {CityName}?";
+                bool isConfirm = await DialogService.ConfirmAsync(dialogMessage, "Delete City");
+                if (isConfirm)
+                {
+                    await CityService.CityDelete(CityId);
+                    await RefreshCitiesGrid();
+                }
+            }
+        }
+    }
+
+    protected async Task CitiesSave()
+    {
+        if (citiesAddEdit.CityId == 0)
+        {
+            // Insert if CityId is zero.
+            citiesAddEdit.CountryId = SelectedCountryId;
+
+            //Check for duplicates
+            if (await CityService.CountCitiesForInsert(SelectedCountryId, citiesAddEdit.CityName) == 0)
+            {
+                //If count comes back as 0 there are no cities for the selected country with the new name, so insert.
+                await CityService.CityInsert(citiesAddEdit);
+                await DialogCity.HideAsync();
+            }
+            else
+            {
+                //Otherwise, display a warning message                
+                await DialogService.AlertAsync("Sorry, you can't add this city for this country, it already exists", "City/Country Already Exists");
+            }
+
+        }
+        else
+        {
+            //Editing an existing city
+
+            //Check for duplicates
+            if (await CityService.CountCitiesForEdit(SelectedCountryId, citiesAddEdit.CityName, citiesAddEdit.CityId) == 0)
+            {
+                //If count comes back as 0 there are no cities for the selected country with the new name, so edit.
+                await CityService.CityUpdate(CityId, citiesAddEdit);
+                await DialogCity.HideAsync();
+            }
+            else
+            {
+                //Otherwise, display a warning message
+                await DialogService.AlertAsync("Sorry, a city with this name already exists for this country. It cannot be added again", "City/Country Already Exists");
+            }
+        }
+        
+        await RefreshCitiesGrid();
+    }
+
+    public void RowSelectHandler(RowSelectEventArgs<City> args)
+    {
+        //{args.Data} returns the current selected records.
+        CityId = args.Data.CityId;
+        CityName = args.Data.CityName;
+        CityPopulation = args.Data.CityPopulation;
+    }
+
+    public async Task RefreshCitiesGrid()
+    {
         citiesUnordered = new();
         await CityService.GetCitiesByCountryId(SelectedCountryId);
         foreach (var city in CityService.Cities)
             citiesUnordered.Add(city);
-
+        
+        //Sort in alphabetical name ascending
         cities = citiesUnordered.OrderBy(c => c.CityName).ToList();
+
+        //Clear city data
+        citiesAddEdit = new();
+        CityId = 0;
+        CityName = string.Empty;
+        CityPopulation = 0;
     }
 
 }

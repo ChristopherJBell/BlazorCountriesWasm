@@ -9,7 +9,7 @@
         Task CityInsert(City city);
         Task CityUpdate(int Cityid, City city);
         Task CityDelete(int Cityid);
-        Task<int> CountCitiesByName(string cityName);
-        Task<int> CountCitiesByNameAndId(string cityName, int id);
+        Task<int> CountCitiesForInsert(int CountryId, string cityName);
+        Task<int> CountCitiesForEdit(int CountryId, string cityName, int CityId);
     }
 }
