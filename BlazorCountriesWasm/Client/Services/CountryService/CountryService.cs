@@ -43,13 +43,13 @@ namespace BlazorCountriesWasm.Client.Services.CountryService
             throw new Exception("Country not found!");
         }
 
-        public async Task<int> CountCountriesByName(string countryName)
+        public async Task<int> CountCountriesForInsert(string countryName)
         {
             var result = await _http.GetFromJsonAsync<int>($"api/countryname/{countryName}");
             return result;
         }
 
-        public async Task<int> CountCountriesByNameAndId(string countryName, int id)
+        public async Task<int> CountCountriesForEdit(string countryName, int id)
         {
             var result = await _http.GetFromJsonAsync<int>($"api/countryname/{countryName}/{id}");
             return result;

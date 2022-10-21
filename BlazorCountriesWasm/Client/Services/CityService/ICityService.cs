@@ -3,8 +3,6 @@
     public interface ICityService
     {
         List<City> Cities { get; set; }
-        Task GetCities();
-        Task<City> GetCityById(int Cityid);
         Task GetCitiesByCountryId(int CountryId);
         Task CityInsert(City city);
         Task CityUpdate(int Cityid, City city);

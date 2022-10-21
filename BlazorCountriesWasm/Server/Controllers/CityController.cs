@@ -21,37 +21,6 @@ namespace BlazorCountriesWasm.Server.Controllers
         IEnumerable<City>? cities;
 
 
-
-        [HttpGet]
-        [Route("api/city/")]
-        public async Task<ActionResult<List<City>>> GetCities()
-        {
-            sqlCommand = "Select * From Cities";
-
-            using IDbConnection conn = new SQLiteConnection(_config.GetConnectionString(connectionId));
-            {
-                cities = await conn.QueryAsync<City>(sqlCommand);
-            }
-            return Ok(cities);
-        }
-
-        [HttpGet]
-        [Route("api/city/{CityId}")]
-        public async Task<ActionResult<City>> GetCityById(int CityId)
-        {
-            var parameters = new DynamicParameters();
-            parameters.Add("@CityId", CityId, DbType.Int32);
-
-            sqlCommand = $"Select * From Cities " +
-                "Where CityId =  @CityId";
-
-            using IDbConnection conn = new SQLiteConnection(_config.GetConnectionString(connectionId));
-            {
-                var city = await conn.QueryFirstAsync<City>(sqlCommand, parameters);
-                return Ok(city);
-            }
-        }
-
         [HttpGet]
         [Route("api/citiesbycountryid/{CountryId}")]
         public async Task<ActionResult<City>> GetCitiesByCountryId(int CountryId)

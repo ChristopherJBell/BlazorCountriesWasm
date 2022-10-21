@@ -8,7 +8,7 @@
         Task CountryInsert(Country country);
         Task CountryUpdate(int Countryid, Country country);
         Task CountryDelete(int Countryid);
-        Task<int> CountCountriesByName(string countryName);
-        Task<int> CountCountriesByNameAndId(string countryName, int id);
+        Task<int> CountCountriesForInsert(string countryName);
+        Task<int> CountCountriesForEdit(string countryName, int id);
     }
 }

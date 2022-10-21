@@ -60,7 +60,7 @@
         if (CountryId == 0)
         {
             //Check for duplicates
-            if (await CountryService.CountCountriesByName(country.CountryName) == 0)
+            if (await CountryService.CountCountriesForInsert(country.CountryName) == 0)
             {
                 await CountryService.CountryInsert(country);
                 NavigationManager.NavigateTo("/countrylist");
@@ -73,7 +73,7 @@
         else
         {
             //Check for duplicates
-            if (await CountryService.CountCountriesByNameAndId(country.CountryName, country.CountryId) == 0)
+            if (await CountryService.CountCountriesForEdit(country.CountryName, country.CountryId) == 0)
             {
                 await CountryService.CountryUpdate(CountryId, country);
                 NavigationManager.NavigateTo("/countrylist");

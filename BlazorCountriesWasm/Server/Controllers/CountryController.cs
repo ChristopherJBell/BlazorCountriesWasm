@@ -52,7 +52,7 @@ namespace BlazorCountriesWasm.Server.Controllers
 
         [HttpGet]
         [Route("api/countryname/{CountryName}")]
-        public async Task<ActionResult> CountCountriesByName(string CountryName)
+        public async Task<ActionResult> CountCountriesForInsert(string CountryName)
         {
             var parameters = new DynamicParameters();
             parameters.Add("@CountryName", CountryName, DbType.String);
@@ -69,7 +69,7 @@ namespace BlazorCountriesWasm.Server.Controllers
 
         [HttpGet]
         [Route("api/countryname/{CountryName}/{CountryId}")]
-        public async Task<ActionResult> CountCountriesByNameAndId(string CountryName, int CountryId)
+        public async Task<ActionResult> CountCountriesForEdit(string CountryName, int CountryId)
         {
             var parameters = new DynamicParameters();
             parameters.Add("@CountryName", CountryName, DbType.String);
