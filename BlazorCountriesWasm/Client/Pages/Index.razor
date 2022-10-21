@@ -6,7 +6,8 @@
 
 <PageTitle>Countries & Cities List</PageTitle>
 
-<h3>Countries and Cities</h3>
+    <h3>Countries and Cities</h3>
+
 <div class="DropDownWrapper">
     <SfDropDownList TItem="Country"
                     TValue="string"
@@ -21,27 +22,43 @@
 
 <hr />
 
-<div>
+<div class="col-sm-8" style="height: calc(100vh - 15rem);">
     <SfGrid ID="CityGrid"
             DataSource="@cities"
-            AllowSorting="true"
-            AllowResizing="true"
-            Height="200"
+            AllowSorting="true"  
+            EnableStickyHeader="true"
+            Height="100%"
             Toolbar="Toolbaritems">
 
         <GridColumns>
             <GridColumn Field="@nameof(City.CityName)"
                         HeaderText="City Name"
                         TextAlign="@TextAlign.Left"
-                        Width="50">
+                        Width="50%">
             </GridColumn>
             <GridColumn Field="@nameof(City.CityPopulation)"
                         HeaderText="Population"
-                        Format="n"
+                        Format="n0"
                         TextAlign="@TextAlign.Right"
-                        Width="50">
+                        Width="50%">
             </GridColumn>
         </GridColumns>
+        <GridAggregates>
+            <GridAggregate>
+                <GridAggregateColumns>
+                    <GridAggregateColumn Field=@nameof(City.CityPopulation) Type="AggregateType.Sum" Format="n0">
+                        <FooterTemplate>
+                            @{
+                                var aggregate = (context as AggregateTemplateContext);
+                                <div>
+                                    <p>Total Cities Population: @aggregate.Sum</p>
+                                </div>
+                            }
+                        </FooterTemplate>
+                    </GridAggregateColumn>
+                </GridAggregateColumns>
+            </GridAggregate>
+        </GridAggregates>
         <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="City" RowSelected="RowSelectHandler"></GridEvents>
     </SfGrid>
 </div>
@@ -63,7 +80,9 @@
             <br /><br />
             <div class="e-footer-content">
                 <div class="button-container">
+                    <button type="submit" disabled style="display: none" aria-hidden="true"></button>
                     <button type="submit" class="e-btn e-normal e-primary">Save</button>
+                    <button type="button" class="e-btn e-normal" @onclick="@Cancel">Cancel</button>
                 </div>
             </div>
         </EditForm>
@@ -240,6 +259,12 @@
         CityId = 0;
         CityName = string.Empty;
         CityPopulation = 0;
+    }
+
+    //Executes if user clicks the Cancel button.
+    public async void Cancel()
+    {
+        await DialogCity.HideAsync();
     }
 
 }

@@ -9,26 +9,28 @@
 
 <h3>Countries List</h3>
 
-<SfGrid DataSource="@countries"
-        Toolbar="Toolbaritems">
-    <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="Country" RowSelected="RowSelectHandler"></GridEvents>
-    <GridColumns>
-        <GridColumn Field="@nameof(Country.CountryId)"
-                    HeaderText="Country ID"
-                    TextAlign="@TextAlign.Left"
-                    Width="20">
-        </GridColumn>
-        <GridColumn Field="@nameof(Country.CountryName)"
-                    HeaderText="Country Name"
-                    TextAlign="@TextAlign.Left"
-                    Width="80">
-        </GridColumn>
-    </GridColumns>
-</SfGrid>
+<hr />
+
+<div class="col-sm-8" style="height: calc(100vh - 10rem);">
+    <SfGrid DataSource="@countries"
+            AllowSorting="true"
+            Height="100%"
+            Toolbar="Toolbaritems">
+        <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="Country" RowSelected="RowSelectHandler"></GridEvents>
+        <GridColumns>
+            <GridColumn Field="@nameof(Country.CountryName)"
+                        HeaderText="Country Name"
+                        TextAlign="@TextAlign.Left"
+                        Width="100">
+            </GridColumn>
+        </GridColumns>
+    </SfGrid>
+ </div>
 
 @code {
     private List<ItemModel> Toolbaritems = new List<ItemModel>();  //provides the list to populate the toolbar items
     private List<Country>? countries;
+    private List<Country>? countriesUnordered;
     private int CountryID = 0;
     private string CountryName = string.Empty;
 
@@ -98,8 +100,10 @@
     public async Task RefreshCountriesGrid()
     {
         await CountryService.GetCountries();
-        countries = new();
+        countriesUnordered = new();
         foreach (var country in CountryService.Countries)
-            countries.Add(country);
+            countriesUnordered.Add(country);
+
+        countries = countriesUnordered.OrderBy(c => c.CountryName).ToList();
     }
 }
